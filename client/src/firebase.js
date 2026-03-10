@@ -1,6 +1,4 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, onSnapshot, getDoc, query, orderBy, limit } from 'firebase/firestore';
-
+// Use Firebase from CDN (window.firebase)
 const firebaseConfig = {
     apiKey: "AIzaSyCGhsF-nlCsK2FFtcxccUdlezUSOxBVnxU",
     authDomain: "umbralbot-734bd.firebaseapp.com",
@@ -11,7 +9,8 @@ const firebaseConfig = {
     measurementId: "G-KSNV16NTFR"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Initialize Firebase from CDN
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-export { db, collection, doc, onSnapshot, getDoc, query, orderBy, limit };
+export { db, firebase };
