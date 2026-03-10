@@ -344,7 +344,7 @@ async function generateWalletImage(user, orbs) {
     ctx.textBaseline = 'alphabetic';
 
     // Draw Orbs Value in pinkish gradient
-    const balanceText = orbs.toLocaleString();
+    const balanceText = (Number(orbs) || 0).toLocaleString();
     const balGrad = ctx.createLinearGradient(0, H / 2 - 30, 0, H / 2 + 30);
     balGrad.addColorStop(0, '#fdf4ff'); // very light pink
     balGrad.addColorStop(1, '#f0abfc'); // solid pink

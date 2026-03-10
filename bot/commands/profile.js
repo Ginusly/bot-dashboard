@@ -29,13 +29,13 @@ module.exports = {
             let profileData = {
                 profile_background_url: null,
                 frame_color: null,
-                title: profile.title || '',
-                rep: profile.rep || 0,
+                title: profile?.title || '',
+                rep: profile?.rep || 0,
                 badges: []
             };
 
             // Get background
-            if (profile.current_background) {
+            if (profile?.current_background) {
                 const bg = await db.getShopItem(profile.current_background);
                 if (bg) {
                     profileData.profile_background_url = bg.image_url;
@@ -45,7 +45,7 @@ module.exports = {
             }
 
             // Get frame
-            if (profile.current_frame) {
+            if (profile?.current_frame) {
                 const frame = await db.getShopItem(profile.current_frame);
                 if (frame) {
                     profileData.frame_color = frame.image_url;
@@ -55,10 +55,10 @@ module.exports = {
             }
 
             // Get badges with details
-            if (profile.badges && profile.badges.length > 0) {
+            if (profile?.badges && Array.isArray(profile.badges) && profile.badges.length > 0) {
                 const seenIcons = new Set();
                 for (const badgeId of [...new Set(profile.badges)]) {
-                    if (profileData.badges.length >= 10) break; // Max 10 badges
+                    if (profileData.badges.length >= 10) break; 
                     try {
                         const badgeItem = await db.getShopItem(badgeId);
                         if (badgeItem) {
@@ -72,42 +72,49 @@ module.exports = {
                                     color: badgeItem.color
                                 });
                             }
-                        } else {
-                            if (!seenIcons.has('⭐')) {
-                                seenIcons.add('⭐');
-                                profileData.badges.push({ icon: '⭐', name: 'Badge', id: badgeId });
-                            }
                         }
-                    } catch {
-                        if (!seenIcons.has('⭐')) {
-                            seenIcons.add('⭐');
-                            profileData.badges.push({ icon: '⭐', name: 'Badge', id: badgeId });
-                        }
-                    }
+                    } catch (e) {}
                 }
             }
 
             console.log(`[PROFILE] Generating profile image for ${targetUser.tag}...`);
 
-            // Generate profile image using original generator
+            // Generate profile image
             let buffer, attachment;
 
             if (profileData.bg_is_css || profileData.frame_is_css) {
-                console.log(`[PROFILE] Generating animated GIF for ${targetUser.tag}...`);
                 const { generateAnimatedProfileGif } = require('../services/gifGenerator');
                 buffer = await generateAnimatedProfileGif(targetUser, levelData, profileData);
-                attachment = new AttachmentBuilder(buffer, { name: 'profile.gif' });
+                if (buffer) attachment = new AttachmentBuilder(buffer, { name: 'profile.gif' });
             } else {
                 buffer = await generateProfileImage(targetUser, levelData, profileData);
-                attachment = new AttachmentBuilder(buffer, { name: 'profile.png' });
+                if (buffer) attachment = new AttachmentBuilder(buffer, { name: 'profile.png' });
+            }
+
+            if (!buffer) {
+                // Fallback text-based profile if canvas is missing or failed
+                const embed = new EmbedBuilder()
+                    .setTitle(`👤 بروفايل: ${targetUser.username}`)
+                    .setColor('#5865F2')
+                    .setThumbnail(targetUser.displayAvatarURL())
+                    .addFields(
+                        { name: '⭐ السمعة (Rep)', value: `${profileData.rep}`, inline: true },
+                        { name: '📊 المستوى', value: `${levelData?.level || 0}`, inline: true },
+                        { name: '✨ الخبرة (XP)', value: `${levelData?.xp || 0}`, inline: true }
+                    );
+                if (profileData.title) embed.setDescription(`*${profileData.title}*`);
+                return await interaction.editReply({ 
+                    content: '*(ملاحظة: صورة البروفايل معطلة حالياً، إليك البيانات النصية)*',
+                    embeds: [embed] 
+                });
             }
 
             await interaction.editReply({ files: [attachment] });
             console.log(`[PROFILE] Sent profile for ${targetUser.tag}`);
 
         } catch (error) {
-            console.error('[COMMAND: profile] Detailed Error:', error);
-            await interaction.editReply(`❌ فشل في استخراج البروفايل: ${error.message}`);
+            console.error('[COMMAND: profile] Error:', error);
+            await interaction.editReply(`❌ فشل في استخراج البروفايل. يرجى التأكد من بياناتك.`);
         }
     },
 };

@@ -289,7 +289,16 @@ module.exports = {
         const docId = `GLOBAL_${userId}`;
         const docRef = firebase.doc(firebase.db, 'economy', docId);
         const docSnap = await firebase.getDoc(docRef);
-        if (docSnap.exists()) return docSnap.data();
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            return {
+                balance: data.balance || 0,
+                total_earned: data.total_earned || 0,
+                last_daily: data.last_daily || null,
+                user_id: userId,
+                guild_id: 'GLOBAL'
+            };
+        }
         const data = { balance: 0, total_earned: 0, last_daily: null, user_id: userId, guild_id: 'GLOBAL' };
         await firebase.setDoc(docRef, data);
         return data;
@@ -352,7 +361,16 @@ module.exports = {
         const docId = `${guildId}_${userId}`;
         const docRef = firebase.doc(firebase.db, 'levels', docId);
         const docSnap = await firebase.getDoc(docRef);
-        return docSnap.exists() ? docSnap.data() : { xp: 0, level: 0 };
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            return {
+                xp: data.xp || 0,
+                level: data.level || 0,
+                guild_id: guildId,
+                user_id: userId
+            };
+        }
+        return { xp: 0, level: 0, guild_id: guildId, user_id: userId };
     },
     updateUserXP: async (guildId, userId, xp, level) => {
         const docId = `${guildId}_${userId}`;
@@ -463,15 +481,22 @@ module.exports = {
             let profile = docSnap.exists() ? docSnap.data() : null;
 
             if (!profile) {
-                profile = { user_id: userId, current_background: null, current_frame: null };
+                profile = { user_id: userId, current_background: null, current_frame: null, title: '', rep: 0, badges: [] };
                 await firebase.setDoc(docRef, profile);
             }
 
+            // Ensure important fields exist
+            profile.title = profile.title || '';
+            profile.rep = profile.rep || 0;
+            profile.badges = profile.badges || [];
+
             if (!module.exports._cache) module.exports._cache = {};
             module.exports._cache[cacheKey] = profile;
-            setTimeout(() => delete module.exports._cache[cacheKey], 60000); // كاش دقيقة للبروفايل
+            setTimeout(() => delete module.exports._cache[cacheKey], 60000); 
             return profile;
-        } catch (e) { return { user_id: userId }; }
+        } catch (e) { 
+            return { user_id: userId, title: '', rep: 0, badges: [] }; 
+        }
     },
 
     equipItem: async (userId, itemId, type) => {

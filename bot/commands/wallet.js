@@ -16,8 +16,12 @@ module.exports = {
 
             // Generate the image
             const buffer = await generateWalletImage(interaction.user, userOrbs);
-            const attachment = new AttachmentBuilder(buffer, { name: 'wallet.png' });
+            
+            if (!buffer) {
+                return await interaction.editReply(`💰 **محفظتك:** ${userOrbs} Orbs\n*(ملاحظة: توليد الصور معطل حالياً)*`);
+            }
 
+            const attachment = new AttachmentBuilder(buffer, { name: 'wallet.png' });
             await interaction.editReply({ files: [attachment] });
         } catch (error) {
             console.error('[COMMAND: wallet] Error:', error);
