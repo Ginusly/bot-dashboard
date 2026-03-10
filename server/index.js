@@ -433,10 +433,12 @@ app.get('/api/user/profile/image', requireAuth, async (req, res) => {
         if (profileData.bg_is_css || profileData.frame_is_css) {
             const { generateAnimatedProfileGif } = require('../bot/services/gifGenerator');
             const buffer = await generateAnimatedProfileGif(userMock, levelData, profileData);
+            if (!buffer) return res.status(503).send('Image generation disabled locally');
             res.setHeader('Content-Type', 'image/gif');
             res.send(buffer);
         } else {
             const buffer = await generateProfileImage(userMock, levelData, profileData);
+            if (!buffer) return res.status(503).send('Image generation disabled locally');
             res.setHeader('Content-Type', 'image/png');
             res.send(buffer);
         }

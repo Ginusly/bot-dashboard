@@ -1,4 +1,9 @@
-const Canvas = require('canvas');
+let Canvas;
+try {
+    Canvas = require('canvas');
+} catch (e) {
+    console.warn('[IMAGE SERVICE] Canvas is not installed. Profile/Welcome images will be disabled locally.');
+}
 
 // Polyfill roundRect for older node-canvas versions if needed
 if (!Canvas.CanvasRenderingContext2D.prototype.roundRect) {
@@ -21,6 +26,7 @@ const CAN_W = 700;
 const CAN_H = 250;
 
 const generateCanvasImage = async (member, backgroundUrl, configData) => {
+    if (!Canvas) return null;
     const canvas = Canvas.createCanvas(CAN_W, CAN_H);
     const ctx = canvas.getContext('2d');
 
@@ -255,6 +261,7 @@ async function renderDefaultWelcome(ctx, member) {
 }
 
 async function generateWalletImage(user, orbs) {
+    if (!Canvas) return null;
     const W = 600, H = 340;
     const canvas = Canvas.createCanvas(W, H);
     const ctx = canvas.getContext('2d');
@@ -384,6 +391,7 @@ async function generateWalletImage(user, orbs) {
 }
 
 async function generateProfileImage(user, levelData, profileData) {
+    if (!Canvas) return null;
     const W = 950, H = 320;
     const canvas = Canvas.createCanvas(W, H);
     const ctx = canvas.getContext('2d');

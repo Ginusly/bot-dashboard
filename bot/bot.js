@@ -200,10 +200,14 @@ client.on('guildMemberAdd', async member => {
             // Generate welcome image
             try {
                 const imageBuffer = await generateCanvasImage(member);
-                await channel.send({
-                    content: welcomeMessage,
-                    files: [{ attachment: imageBuffer, name: 'welcome.png' }]
-                });
+                if (imageBuffer) {
+                    await channel.send({
+                        content: welcomeMessage,
+                        files: [{ attachment: imageBuffer, name: 'welcome.png' }]
+                    });
+                } else {
+                    await channel.send(welcomeMessage);
+                }
             } catch (err) {
                 console.error('[BOT] Error generating welcome image:', err);
                 await channel.send(welcomeMessage);

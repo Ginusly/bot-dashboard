@@ -6,8 +6,14 @@
  * All blending done at render time into an opaque canvas.
  */
 
-const Canvas = require('canvas');
-const GIFEncoder = require('gif-encoder-2');
+let Canvas, GIFEncoder;
+try {
+    Canvas = require('canvas');
+    GIFEncoder = require('gif-encoder-2');
+} catch (e) {
+    Canvas = null;
+    GIFEncoder = null;
+}
 
 // ─── roundRect polyfill ───────────────────────────────────────────────────────
 if (!Canvas.CanvasRenderingContext2D.prototype.roundRect) {
@@ -495,6 +501,7 @@ function drawDefaultBg(ctx, W, H) {
 
 // ─── Main export ─────────────────────────────────────────────────────────────
 async function generateAnimatedProfileGif(user, levelData, profileData) {
+    if (!Canvas || !GIFEncoder) return null;
     const W = 950, H = 320;
     const total = 40; // 2s @ 20fps
 

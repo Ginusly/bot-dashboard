@@ -1,10 +1,16 @@
-const Canvas = require('canvas');
+let Canvas;
+try {
+    Canvas = require('canvas');
+} catch (e) {
+    Canvas = null;
+}
 const path = require('path');
 
 // Register custom font if you have one, otherwise use system fonts
 // Canvas.registerFont(path.join(__dirname, 'fonts/Roboto-Bold.ttf'), { family: 'Roboto' });
 
 const generateWelcomeImage = async (member, backgroundUrl, welcomeData = null) => {
+    if (!Canvas) return null;
     const canvas = Canvas.createCanvas(700, 250);
     const ctx = canvas.getContext('2d');
 
@@ -116,9 +122,6 @@ const generateWelcomeImage = async (member, backgroundUrl, welcomeData = null) =
     }
 
     return canvas.toBuffer();
-};
-
-return canvas.toBuffer();
 };
 
 module.exports = { generateWelcomeImage };
