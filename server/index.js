@@ -619,3 +619,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => console.log(`[SERVER] ✅ Running on http://localhost:${PORT}`));
+
+// ─── Start Discord Bot ───────────────────────────────────────────────────────────────
+console.log('[BOT] Starting Discord bot...');
+require('../bot/bot.js');
