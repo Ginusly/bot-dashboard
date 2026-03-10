@@ -5,5 +5,8 @@
   "deploy": {
     "startCommand": "npm run server",
     "healthcheckPath": "/api/health"
+  },
+  "nixpacks": {
+    "node": "20"
   }
 }
