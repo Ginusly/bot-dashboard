@@ -1,9 +1,0 @@
-{
-  "build": {
-    "builder": "DOCKERFILE"
-  },
-  "deploy": {
-    "startCommand": "npm run server",
-    "healthcheckPath": "/api/health"
-  }
-}
