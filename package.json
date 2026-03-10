@@ -8,7 +8,7 @@
     "server": "nodemon server/index.js",
     "bot": "node bot/bot.js",
     "dev": "npx concurrently \"npm run server\" \"npm run bot\"",
-    "build": "echo 'No build step currently defined'"
+    "build": "cd client && npm install && npm run build"
   },
   "dependencies": {
     "axios": "^1.6.0",

@@ -612,13 +612,16 @@ app.get('/api/admin/stats', requireAuth, async (req, res) => {
     } catch (e) { res.status(500).json({ error: 'Stats unavailable' }); }
 });
 
-// ─── Health ────────────────────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
+// ─── Static Files (Frontend) ──────────────────────────────────────────────────
+// Serve static files from the 'client/dist' directory (after building)
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// ─── Global Error Handler ──────────────────────────────────────────────────────
-app.use((err, req, res, next) => {
-    console.error('[SERVER] Unhandled Error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+// Serve index.html for all other routes (for React Router)
+app.get('*', (req, res) => {
+    // Only handle routes that are not API calls
+    if (!req.path.startsWith('/api/')) {
+        res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    }
 });
 
 app.listen(PORT, () => console.log(`[SERVER] ✅ Running on http://localhost:${PORT}`));
