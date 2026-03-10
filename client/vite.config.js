@@ -3,7 +3,11 @@ import react from '@vitejs/plugin-react-swc'
 
 export default defineConfig({
     plugins: [react()],
-    envDir: '../',
+    build: {
+        rollupOptions: {
+            external: ['firebase/app']
+        }
+    },
     server: {
         proxy: {
             '/api': {
