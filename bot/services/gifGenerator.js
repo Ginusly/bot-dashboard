@@ -16,7 +16,7 @@ try {
 }
 
 // ─── roundRect polyfill ───────────────────────────────────────────────────────
-if (!Canvas.CanvasRenderingContext2D.prototype.roundRect) {
+if (Canvas && !Canvas.CanvasRenderingContext2D.prototype.roundRect) {
     Canvas.CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
         if (w < 2 * r) r = w / 2;
         if (h < 2 * r) r = h / 2;
