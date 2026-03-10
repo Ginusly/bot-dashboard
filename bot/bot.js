@@ -264,50 +264,49 @@ client.on('reconnecting', () => {
 });
 
 // ─── Login ───────────────────────────────────────────────────────────────────────
-console.log('[BOT] Attempting to login with Discord...');
+async function startup() {
+    console.log('[BOT] --- STARTUP SEQUENCE ---');
+    const rawToken = process.env.DISCORD_TOKEN;
+    
+    if (!rawToken || rawToken.trim().length < 50) {
+        console.error('[BOT ERROR] DISCORD_TOKEN is invalid or missing in Render Environment Variables!');
+        return;
+    }
 
-// Clean and validate token
-const rawToken = process.env.DISCORD_TOKEN;
-if (!rawToken || rawToken.trim().length === 0) {
-    console.error('[BOT ERROR] DISCORD_TOKEN is missing or empty in Environment Variables!');
-} else {
     const token = rawToken.trim();
-    console.log('[BOT] Token exists, length:', token.length);
-    console.log('[BOT] Token prefix:', token.substring(0, 10) + '...');
+    console.log('[BOT] Token validated. Length:', token.length);
+    console.log('[BOT] Token starting with:', token.substring(0, 15));
 
-    client.login(token)
-        .then(() => {
-            console.log('[BOT] ✅ Login handshake initiated');
-        })
-        .catch(err => {
-            console.error('[BOT ERROR] Login failed instantly:', err.message);
-            if (err.message.includes('Token')) {
-                console.error('[BOT ERROR] The provided token is invalid. Please check your Render Environment Variables.');
-            }
-        });
+    try {
+        console.log('[BOT] Handshaking with Discord Gateway...');
+        await client.login(token);
+        console.log('[BOT] ✅ Login call successful');
+    } catch (err) {
+        console.error('[BOT ERROR] Fatal login error:', err.message);
+        if (err.message.includes('Token')) {
+            console.error('[BOT ERROR] THE TOKEN IN RENDER SETTINGS IS INVALID.');
+        }
+    }
 
-    // Diagnosing connection status after 30 seconds
+    // Comprehensive diagnostic check after 45 seconds
     setTimeout(() => {
         if (client.isReady()) {
-            console.log('[BOT] Login check: Status is READY');
+            console.log('[BOT] Connection check: ONLINE');
         } else {
-            const statuses = ['READY', 'CONNECTING', 'RECONNECTING', 'IDLE', 'NEARLY', 'DISCONNECTED', 'WAITING_FOR_GUILDS', 'IDENTIFYING', 'RESUMING'];
-            const currentStatus = client.ws.status;
-            console.log(`[BOT] Login check: STILL NOT READY. Current Status: ${statuses[currentStatus] || currentStatus}`);
+            const wsStatus = client.ws.status;
+            const statusMap = ['READY', 'CONNECTING', 'RECONNECTING', 'IDLE', 'NEARLY', 'DISCONNECTED', 'WAITING_FOR_GUILDS', 'IDENTIFYING', 'RESUMING'];
+            console.log(`[BOT] Connection check: FAILED. Current WS Status: ${statusMap[wsStatus] || wsStatus}`);
+            console.log('[BOT] Advice: Check if the token is 100% correct in Render Env Vars.');
             
-            if (currentStatus === 5) { // DISCONNECTED
-                console.log('[BOT] Status is DISCONNECTED. Retrying login...');
+            if (wsStatus === 5 || wsStatus === 8) {
+                console.log('[BOT] Attempting one-time reconnection...');
                 client.login(token).catch(() => {});
             }
         }
-    }, 30000); 
+    }, 45000);
 }
 
-// Export for testing purposes
-module.exports = {
-    client,
-    commandLoader,
-    interactionHandler,
-    slashCommandRegister,
-    azkarSystem
-};
+startup();
+
+// Export for troubleshooting
+module.exports = { client, commandLoader, interactionHandler, slashCommandRegister, azkarSystem };
