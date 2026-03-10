@@ -223,6 +223,7 @@ const ALLOWED_SETTINGS_COLUMNS = new Set([
 
 // ─── Exports ───────────────────────────────────────────────────────────────────
 module.exports = {
+    firebase,
     // ── Guild Settings ──────────────────────────────────────────────────────────
     getSettings: (guildId) => {
         let s = db.prepare('SELECT * FROM guild_settings WHERE guild_id = ?').get(guildId);

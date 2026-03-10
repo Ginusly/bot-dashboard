@@ -310,8 +310,9 @@ app.get('/api/leaderboard/xp', async (req, res) => {
     try {
         // Without a guildId, fetch top 20 globally across all guilds
         let q = req.query.guild;
-        const qParams = [require('firebase/firestore').collection(db.firebase.db || require('../firebase').db || null, 'levels'), require('firebase/firestore').orderBy('xp', 'desc'), require('firebase/firestore').limit(20)];
-        if (q) qParams.splice(1, 0, require('firebase/firestore').where('guild_id', '==', q));
+        const firebase = db.firebase;
+        const { collection, orderBy, limit, query, getDocs, where } = require('firebase/firestore');
+        const qParams = [collection(firebase.db, 'levels'), orderBy('xp', 'desc'), limit(20)];
         // Fallback since the current database.js `getXpLeaderboard` requires guild_id 
         const top = await db.getXpLeaderboard(q || 'GLOBAL', 20).catch(async () => {
             // If it fails or we want a custom global fallback we'd query it here directly but let's stick to modifying what we can.
