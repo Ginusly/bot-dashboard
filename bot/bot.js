@@ -265,25 +265,43 @@ client.on('reconnecting', () => {
 
 // ─── Login ───────────────────────────────────────────────────────────────────────
 console.log('[BOT] Attempting to login with Discord...');
-console.log('[BOT] Token exists:', !!process.env.DISCORD_TOKEN);
-console.log('[BOT] Token length:', process.env.DISCORD_TOKEN ? process.env.DISCORD_TOKEN.length : 0);
 
-const loginPromise = client.login(process.env.DISCORD_TOKEN);
+// Clean and validate token
+const rawToken = process.env.DISCORD_TOKEN;
+if (!rawToken || rawToken.trim().length === 0) {
+    console.error('[BOT ERROR] DISCORD_TOKEN is missing or empty in Environment Variables!');
+} else {
+    const token = rawToken.trim();
+    console.log('[BOT] Token exists, length:', token.length);
+    console.log('[BOT] Token prefix:', token.substring(0, 10) + '...');
 
-// Add timeout to detect hanging login
-setTimeout(() => {
-    if (client.user) {
-        console.log('[BOT] Login successful - timeout check passed');
-    } else {
-        console.log('[BOT] Login timeout - something is wrong');
-        console.log('[BOT] Client status:', client.status);
-    }
-}, 10000); // 10 seconds timeout
+    client.login(token)
+        .then(() => {
+            console.log('[BOT] ✅ Login handshake initiated');
+        })
+        .catch(err => {
+            console.error('[BOT ERROR] Login failed instantly:', err.message);
+            if (err.message.includes('Token')) {
+                console.error('[BOT ERROR] The provided token is invalid. Please check your Render Environment Variables.');
+            }
+        });
 
-loginPromise.catch(err => {
-    console.error('[BOT] Failed to login:', err);
-    process.exit(1);
-});
+    // Diagnosing connection status after 30 seconds
+    setTimeout(() => {
+        if (client.isReady()) {
+            console.log('[BOT] Login check: Status is READY');
+        } else {
+            const statuses = ['READY', 'CONNECTING', 'RECONNECTING', 'IDLE', 'NEARLY', 'DISCONNECTED', 'WAITING_FOR_GUILDS', 'IDENTIFYING', 'RESUMING'];
+            const currentStatus = client.ws.status;
+            console.log(`[BOT] Login check: STILL NOT READY. Current Status: ${statuses[currentStatus] || currentStatus}`);
+            
+            if (currentStatus === 5) { // DISCONNECTED
+                console.log('[BOT] Status is DISCONNECTED. Retrying login...');
+                client.login(token).catch(() => {});
+            }
+        }
+    }, 30000); 
+}
 
 // Export for testing purposes
 module.exports = {
