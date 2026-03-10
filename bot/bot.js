@@ -243,11 +243,28 @@ client.on('ready', () => {
     console.log(`📊 Serving ${client.guilds.cache.size} guilds`);
 });
 
+client.on('debug', info => {
+    console.log('[BOT DEBUG]', info);
+});
+
 // ─── Login ───────────────────────────────────────────────────────────────────────
 console.log('[BOT] Attempting to login with Discord...');
 console.log('[BOT] Token exists:', !!process.env.DISCORD_TOKEN);
+console.log('[BOT] Token length:', process.env.DISCORD_TOKEN ? process.env.DISCORD_TOKEN.length : 0);
 
-client.login(process.env.DISCORD_TOKEN).catch(err => {
+const loginPromise = client.login(process.env.DISCORD_TOKEN);
+
+// Add timeout to detect hanging login
+setTimeout(() => {
+    if (client.user) {
+        console.log('[BOT] Login successful - timeout check passed');
+    } else {
+        console.log('[BOT] Login timeout - something is wrong');
+        console.log('[BOT] Client status:', client.status);
+    }
+}, 10000); // 10 seconds timeout
+
+loginPromise.catch(err => {
     console.error('[BOT] Failed to login:', err);
     process.exit(1);
 });
