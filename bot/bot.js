@@ -247,6 +247,22 @@ client.on('debug', info => {
     console.log('[BOT DEBUG]', info);
 });
 
+client.on('warn', warning => {
+    console.log('[BOT WARN]', warning);
+});
+
+client.on('error', error => {
+    console.log('[BOT ERROR]', error);
+});
+
+client.on('disconnect', () => {
+    console.log('[BOT] Disconnected from Discord');
+});
+
+client.on('reconnecting', () => {
+    console.log('[BOT] Reconnecting to Discord...');
+});
+
 // ─── Login ───────────────────────────────────────────────────────────────────────
 console.log('[BOT] Attempting to login with Discord...');
 console.log('[BOT] Token exists:', !!process.env.DISCORD_TOKEN);
