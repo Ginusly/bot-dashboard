@@ -1,13 +1,9 @@
 {
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npx nixpacks build --node-version 20"
+    "builder": "DOCKERFILE"
   },
   "deploy": {
     "startCommand": "npm run server",
     "healthcheckPath": "/api/health"
-  },
-  "nixpacks": {
-    "node": "20"
   }
 }
