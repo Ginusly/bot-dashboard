@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: bot-dashboard-api
+    env: node
+    buildCommand: "npm install --production"
+    startCommand: "node server/index.js"
+    healthCheckPath: /api/health
