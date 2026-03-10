@@ -237,6 +237,15 @@ client.on('error', error => {
 });
 
 // ─── Login ───────────────────────────────────────────────────────────────────────
+console.log('[BOT] Attempting to login with Discord...');
+console.log('[BOT] Token exists:', !!process.env.DISCORD_TOKEN);
+
+client.on('ready', () => {
+    console.log('🤖 Bot is online!');
+    console.log(`🔥 Logged in as ${client.user.tag}!`);
+    console.log(`📊 Serving ${client.guilds.cache.size} guilds`);
+});
+
 client.login(process.env.DISCORD_TOKEN).catch(err => {
     console.error('[BOT] Failed to login:', err);
     process.exit(1);
